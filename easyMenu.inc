@@ -2,7 +2,7 @@
     easyMenu.inc - Textdraw menus with dialog-style callbacks.
 
     Usage:
-        Menu:Example(playerid, response, row, option[])
+        CMenu:Example(playerid, response, row, option[])
         {
             if (!response)
                 return 1;
@@ -39,7 +39,7 @@
     #define PlayerTextDrawBoxColour   PlayerTextDrawBoxColor
 #endif
 
-#define Menu:%0(%1) \
+#define CMenu:%0(%1) \
     forward menu_%0(%1); public menu_%0(%1)
 
 #define Menu_Show(%0,%1, \
@@ -58,6 +58,7 @@ static
     easyMenu_Count[MAX_PLAYERS],
     easyMenu_LastUpDown[MAX_PLAYERS],
     easyMenu_LastLeftRight[MAX_PLAYERS],
+    easyMenu_Tick[MAX_PLAYERS],
     easyMenu_TitleText[MAX_PLAYERS][EASY_MENU_TITLE_LENGTH],
     easyMenu_Callback[MAX_PLAYERS][EASY_MENU_CALLBACK_LENGTH],
     easyMenu_Options[MAX_PLAYERS][EASY_MENU_MAX_OPTIONS][EASY_MENU_OPTION_LENGTH],
@@ -265,6 +266,8 @@ stock EasyMenu_Open(playerid, const function[], const title[], const options[])
     easyMenu_Paused[playerid] = false;
     easyMenu_UsingJetpack[playerid] = GetPlayerSpecialAction(playerid) == SPECIAL_ACTION_USEJETPACK;
 
+    easyMenu_Tick[playerid] = GetTickCount();
+
     TogglePlayerControllable(playerid, false);
     EasyMenu_Render(playerid);
     return 1;
@@ -327,6 +330,16 @@ public OnPlayerConnect(playerid)
     return 1;
 }
 
+#if defined _ALS_OnPlayerConnect
+    #undef OnPlayerConnect
+#else
+    #define _ALS_OnPlayerConnect
+#endif
+#define OnPlayerConnect EasyMenu_OnPlayerConnect
+#if defined EasyMenu_OnPlayerConnect
+    forward EasyMenu_OnPlayerConnect(playerid);
+#endif
+
 public OnPlayerDisconnect(playerid, reason)
 {
     #pragma unused reason
@@ -342,31 +355,59 @@ public OnPlayerDisconnect(playerid, reason)
     }
     easyMenu_DrawsCreated[playerid] = false;
     easyMenu_Paused[playerid] = false;
-    if (funcidx("EasyMenu_OnPlayerDisconnect") != -1)
-        return CallLocalFunction("EasyMenu_OnPlayerDisconnect", "ii", playerid, reason);
-    return 1;
+    #if defined EasyMenu_OnPlayerDisconnect
+        return EasyMenu_OnPlayerDisconnect(playerid, reason);
+    #else
+        return 1;
+    #endif
 }
+
+#if defined _ALS_OnPlayerDisconnect
+    #undef OnPlayerDisconnect
+#else
+    #define _ALS_OnPlayerDisconnect
+#endif
+#define OnPlayerDisconnect EasyMenu_OnPlayerDisconnect
+#if defined EasyMenu_OnPlayerDisconnect
+    forward EasyMenu_OnPlayerDisconnect(playerid, reason);
+#endif
 
 public OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-    if (easyMenu_Opened[playerid] && !easyMenu_Paused[playerid])
+    if (easyMenu_Opened[playerid] && !easyMenu_Paused[playerid] && GetTickCount() - easyMenu_Tick[playerid] > 400)
     {
         if ((newkeys & KEY_SPRINT) && !(oldkeys & KEY_SPRINT))
             EasyMenu_Dispatch(playerid, 1);
         else if ((newkeys & KEY_SECONDARY_ATTACK) && !(oldkeys & KEY_SECONDARY_ATTACK))
             EasyMenu_Dispatch(playerid, 0);
     }
-    if (funcidx("EasyMenu_OnPlayerKeyStateChange") != -1)
-        return CallLocalFunction("EasyMenu_OnPlayerKeyStateChange", "iii", playerid, newkeys, oldkeys);
-    return 1;
+
+    #if defined EasyMenu_OnPlayerKeyStateChange
+        return EasyMenu_OnPlayerKeyStateChange(playerid, newkeys, oldkeys);
+    #else
+        return 1;
+    #endif
 }
+
+#if defined _ALS_OnPlayerKeyStateChange
+    #undef OnPlayerKeyStateChange
+#else
+    #define _ALS_OnPlayerKeyStateChange
+#endif
+
+#define OnPlayerKeyStateChange EasyMenu_OnPlayerKeyStateChange
+
+#if defined EasyMenu_OnPlayerKeyStateChange
+    forward EasyMenu_OnPlayerKeyStateChange(playerid, newkeys, oldkeys);
+#endif
+
 
 public OnPlayerUpdate(playerid)
 {
     new keys, updown, leftright;
     GetPlayerKeys(playerid, keys, updown, leftright);
 
-    if (updown != easyMenu_LastUpDown[playerid])
+    if (updown != easyMenu_LastUpDown[playerid] && GetTickCount() - easyMenu_Tick[playerid] > 400)
     {
         easyMenu_LastUpDown[playerid] = updown;
 
@@ -377,44 +418,14 @@ public OnPlayerUpdate(playerid)
             else if (updown == KEY_DOWN)
                 EasyMenu_Move(playerid, 1);
         }
-
-        if (funcidx("OnPlayerKeyUpDown") != -1)
-            CallLocalFunction("OnPlayerKeyUpDown", "dd", playerid, updown);
     }
 
-    if (leftright != easyMenu_LastLeftRight[playerid])
-    {
-        easyMenu_LastLeftRight[playerid] = leftright;
-
-        if (funcidx("OnPlayerKeyLeftRight") != -1)
-            CallLocalFunction("OnPlayerKeyLeftRight", "dd", playerid, leftright);
-    }
-
-    if (funcidx("EasyMenu_OnPlayerUpdate") != -1)
-        return CallLocalFunction("EasyMenu_OnPlayerUpdate", "i", playerid);
-    return 1;
+    #if defined EasyMenu_OnPlayerUpdate
+        return EasyMenu_OnPlayerUpdate(playerid);
+    #else
+        return 1;
+    #endif
 }
-
-#if defined _ALS_OnPlayerConnect
-    #undef OnPlayerConnect
-#else
-    #define _ALS_OnPlayerConnect
-#endif
-#define OnPlayerConnect EasyMenu_OnPlayerConnect
-
-#if defined _ALS_OnPlayerDisconnect
-    #undef OnPlayerDisconnect
-#else
-    #define _ALS_OnPlayerDisconnect
-#endif
-#define OnPlayerDisconnect EasyMenu_OnPlayerDisconnect
-
-#if defined _ALS_OnPlayerKeyStateChange
-    #undef OnPlayerKeyStateChange
-#else
-    #define _ALS_OnPlayerKeyStateChange
-#endif
-#define OnPlayerKeyStateChange EasyMenu_OnPlayerKeyStateChange
 
 #if defined _ALS_OnPlayerUpdate
     #undef OnPlayerUpdate
@@ -422,3 +433,6 @@ public OnPlayerUpdate(playerid)
     #define _ALS_OnPlayerUpdate
 #endif
 #define OnPlayerUpdate EasyMenu_OnPlayerUpdate
+#if defined EasyMenu_OnPlayerUpdate
+    forward EasyMenu_OnPlayerUpdate(playerid);
+#endif

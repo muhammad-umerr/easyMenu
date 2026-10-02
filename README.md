@@ -9,12 +9,12 @@ optional right-aligned information for each option.
 
 ## Creating a menu
 
-Declare a menu callback with `Menu:` and open it with `Menu_Show`:
+Declare a menu callback with `CMenu:` and open it with `Menu_Show`:
 
 ![InventoryMenu Preview](https://i.postimg.cc/RVxy7rGy/sa-mp-0000102.png)
 
 ```pawn
-Menu:InventoryMenu(playerid, response, row, option[])
+CMenu:InventoryMenu(playerid, response, row, option[])
 {
     if (!response)
     {
@@ -38,7 +38,7 @@ CMD:normalmenu(playerid, params[])
 The callback receives:
 
 ```pawn
-Menu:MenuName(playerid, response, row, option[])
+CMenu:MenuName(playerid, response, row, option[])
 ```
 
 - `playerid` - The player who interacted with the menu.
