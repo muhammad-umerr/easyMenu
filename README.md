@@ -54,12 +54,7 @@ Separate options with `\n`. Use `\t` to add right-aligned information:
 ![VehicleMenu Preview](https://i.postimg.cc/8Pg9R8w2/sa-mp-0000103.png)
 
 ```pawn
-Menu_Show(
-    playerid,
-    VehicleMenu,
-    "Vehicles",
-    "Infernus\t$100,000\nBanshee\t$85,000\nBullet\t$75,000"
-);
+Menu_Show(playerid, VehicleMenu, "Vehicles", "Infernus\t$100,000\nBanshee\t$85,000\nBullet\t$75,000");
 ```
 
 The text before `\t` is passed to the callback as `option[]`. The text after
@@ -162,10 +157,9 @@ open.
 
 - 10 visible rows per page.
 - 64 options per menu.
-- 36 characters for the title.
-- 64 characters for each option label.
-- 64 characters for each option information value.
-- 32 characters for a callback name.
-
+- 18 characters for the title.
+- 28 characters per row
+ 
 ## Credits
-Umer
+- Umer - Author, Design
+- All easyDialog contributors - For the functionality reference
