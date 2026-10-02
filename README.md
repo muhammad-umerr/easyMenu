@@ -162,4 +162,4 @@ open.
  
 ## Credits
 - Umer - Author, Design
-- All easyDialog contributors - For the functionality reference
+- All easyDialog contributors - For the functionality reference and inspiration
