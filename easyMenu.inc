@@ -229,7 +229,7 @@ stock EasyMenu_Dispatch(playerid, response)
 
     EasyMenu_HideDraws(playerid);
     TogglePlayerControllable(playerid, true);
-    PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
+    
     if (easyMenu_UsingJetpack[playerid])
         SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
 
@@ -313,15 +313,37 @@ stock EasyMenu_Move(playerid, direction)
     else if (next >= easyMenu_Count[playerid])
         next = 0;
 
+    if(next != easyMenu_Selected[playerid])
+        PlayerPlaySound(playerid, 1083, 0.0, 0.0, 0.0);
+    else
+        PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
+
     easyMenu_Selected[playerid] = next;
     easyMenu_Page[playerid] = next / EASY_MENU_VISIBLE_ROWS;
 
-    PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
 
     EasyMenu_Render(playerid);
 
     if (funcidx("OnMenuRowChanged") != -1)
         CallLocalFunction("OnMenuRowChanged", "dd", playerid, next);
+    return 1;
+}
+
+stock Menu_SetRow(playerid, row)
+{
+    if (!easyMenu_Opened[playerid] || easyMenu_Paused[playerid])
+        return 0;
+
+    if (row < 0 || row >= easyMenu_Count[playerid])
+        return 0;
+
+    easyMenu_Selected[playerid] = row;
+    easyMenu_Page[playerid] = row / EASY_MENU_VISIBLE_ROWS;
+
+    EasyMenu_Render(playerid);
+
+    if (funcidx("OnMenuRowChanged") != -1)
+        CallLocalFunction("OnMenuRowChanged", "dd", playerid, row);
     return 1;
 }
 
