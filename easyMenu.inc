@@ -237,6 +237,11 @@ stock EasyMenu_Dispatch(playerid, response)
     easyMenu_UsingJetpack[playerid] = false;
     easyMenu_Callback[playerid][0] = EOS;
 
+    if(response)
+        PlayerPlaySound(playerid, 1054, 0.0, 0.0, 0.0);
+    else
+        PlayerPlaySound(playerid, 1055, 0.0, 0.0, 0.0);
+
     if (funcidx(callback) != -1)
         CallLocalFunction(callback, "ddds", playerid, response, row, option);
     return 1;
@@ -310,6 +315,9 @@ stock EasyMenu_Move(playerid, direction)
 
     easyMenu_Selected[playerid] = next;
     easyMenu_Page[playerid] = next / EASY_MENU_VISIBLE_ROWS;
+
+    PlayerPlaySound(playerid, 1085, 0.0, 0.0, 0.0);
+
     EasyMenu_Render(playerid);
 
     if (funcidx("OnMenuRowChanged") != -1)
